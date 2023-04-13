@@ -38,7 +38,7 @@ if (file_exists($file)) {
     $versions = array_map(function($line) use ($server_time) {
         list($date, $version) = explode('|', $line);
         $compensated_date = date('Y-m-d H:i:s', strtotime($date, $server_time - strtotime($_SERVER['REQUEST_TIME'])));
-        if (strtotime($compensated_date) >= strtotime('-24.5 hours')) {
+        if (strtotime($compensated_date) >= strtotime('-24 hours')) {
             return htmlspecialchars($version, ENT_QUOTES, 'utf-8');
         }
     }, $data);
