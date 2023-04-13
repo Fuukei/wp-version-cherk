@@ -1,7 +1,10 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // 同步时间为服务器时间
+    date_default_timezone_set('UTC');
+    $date = date('Y-m-d H:i:s', time());
+
     // 防止SQL注入攻击和XSS攻击
-    $date = htmlspecialchars($_POST['date'], ENT_QUOTES, 'utf-8');
     $version = htmlspecialchars($_POST['version'], ENT_QUOTES, 'utf-8');
 
     // 防止文件包含攻击
@@ -28,9 +31,14 @@ $file = realpath(dirname(__FILE__)) . '/data.txt';
 if (file_exists($file)) {
     $data = file($file);
 
-    $versions = array_map(function($line) {
+    // 同步时间为服务器时间
+    date_default_timezone_set('UTC');
+    $server_time = time();
+
+    $versions = array_map(function($line) use ($server_time) {
         list($date, $version) = explode('|', $line);
-        if (strtotime($date) >= strtotime('-24 hours')) {
+        $compensated_date = date('Y-m-d H:i:s', strtotime($date, $server_time - strtotime($_SERVER['REQUEST_TIME'])));
+        if (strtotime($compensated_date) >= strtotime('-24 hours')) {
             return htmlspecialchars($version, ENT_QUOTES, 'utf-8');
         }
     }, $data);
